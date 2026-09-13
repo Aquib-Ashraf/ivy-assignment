@@ -109,3 +109,24 @@ already been reproduced against real API responses — nothing here is a guess.
 - Duplicate detection hypothesis for Q2
 - Fake listing detection hypothesis for Q9
 - Corrupt/impossible record detection for Q4
+
+
+## 9. `posted_at` timestamps have no timezone marker at all (not UTC/Z as documented)
+
+- **endpoint**: `/v1/listings` (also `/v1/rentals`)
+- **category**: `timestamps`
+- **documented**: "Timestamps: ISO 8601, UTC, `Z` suffix, everywhere in the API."
+- **actual**: `posted_at` values look like `"2026-08-29T20:53:00"` — no `Z`, no offset, nothing indicating timezone at all. This contradicts the docs on two counts: not UTC-marked, and missing the promised `Z` suffix entirely.
+- **how_found**: sampled `posted_at` across several real listing records
+- **impact**: directly affects Q8 (listings posted in a specific 7-day IST window before REFERENCE) — an incorrect timezone assumption shifts the window by 5.5 hours and can mis-count boundary listings. ASSUMPTION USED: since `/health` reports the server's own clock explicitly in IST (`+05:30`, `Asia/Kolkata`), and this is an India-only platform, I'm treating `posted_at` as already being in IST with the offset stripped, not UTC. This is a reasonable inference, not a proven fact — flagging it as an assumption in the README.
+- **evidence**: []
+
+## 10. `/v1/analytics/summary` does not exist anywhere — confirmed after multiple attempts
+
+- **endpoint**: `/v1/analytics/summary`
+- **category**: `missing_endpoint`
+- **documented**: `GET /v1/analytics/summary` — pre-computed aggregates for the insights dashboard
+- **actual**: 404 at the documented path, at the `/v2/insights/summary` path `/llms.txt` claimed existed, and at several other reasonable guesses (`/v1/insights`, `/v1/insights/summary`, `/v1/stats`, `/v1/summary`). This endpoint genuinely does not exist anywhere reachable.
+- **how_found**: systematically tried the documented path plus 5 plausible alternates, all 404
+- **impact**: the insights screen must be built entirely from client-side aggregation of the retrievable listings/rentals/projects data rather than a server-provided summary
+- **evidence**: []

@@ -69,14 +69,14 @@ already been reproduced against real API responses — nothing here is a guess.
 - **impact**: any client that trusts `total` to know when to stop will silently miss real records — directly affects the "retrievable" counts the assignment asks for in Q1, Q5, Q8
 - **evidence**: [] (endpoint-level behavior, not specific records — will add specific IDs from the extra tail records if useful)
 
-## 6. `/v1/favourites` does not exist at the documented path
+## 6. `/v1/favourites` does not exist — the real path is `/v1/saved`
 
 - **endpoint**: `/v1/favourites`
 - **category**: `missing_endpoint`
 - **documented**: `GET /v1/favourites`, `POST /v1/favourites`, `DELETE /v1/favourites/{id}` — save/list/remove favourites
-- **actual**: `GET /v1/favourites` (correct auth header + valid bearer token) returns `404 Not Found`
-- **how_found**: called it right after a successful login, with a valid token
-- **impact**: the "saved listings" frontend requirement cannot be built against this path as documented — need to find the real path (still investigating)
+- **actual**: `GET /v1/favourites` (correct auth header + valid bearer token) returns `404 Not Found`. The real, working path is `GET /v1/saved`, which returns the exact shape the docs described for favourites: `{"count": 0, "results": []}`.
+- **how_found**: `/v1/favourites` gave a clean 404 even with a valid token. Tried a few reasonable alternate names; `/v1/saved` returned `401` (not `404`) when called WITHOUT a bearer token — a 401 instead of 404 was the signal it's a real path just missing auth. Retried with a valid `Authorization: Bearer` token and got `200` with the documented response shape.
+- **impact**: the "saved listings" frontend requirement must hit `/v1/saved`, `/v1/saved` (POST/DELETE presumably), not `/v1/favourites` as documented — need to confirm POST/DELETE shapes too before building the frontend feature
 - **evidence**: []
 
 ## 7. `/v1/analytics/summary` does not exist at the documented path
@@ -96,7 +96,7 @@ already been reproduced against real API responses — nothing here is a guess.
 - **documented**: not mentioned anywhere in `API_REFERENCE.md`
 - **actual**: exists, unauthenticated, returns a markdown file explicitly addressed to AI agents, containing per-city summary statistics (listing counts, dedup counts, live counts, projects with wrong counts) and a list of other undocumented paths (`/v2/listings`, `/v2/insights/summary`, `/llms-full.txt`, `/sitemap.xml`, etc.)
 - **how_found**: seen referenced as `for_agents` in the API root response; fetched directly
-- **impact**: none by itself, but IMPORTANT — this file's own text says it was written by the same unreviewed AI process as the main docs, and its sitemap description literally admits to listing "several [properties] that never were." Treating its numbers as ground truth would be a mistake — noting its existence as a finding, not using its stats as answers.
+- **impact**: none by itself, but IMPORTANT — this file's own text says it was written by the same unreviewed AI process as the main docs, and its sitemap description literally admits to listing "several [properties] that never were." Treating its numbers as ground truth would be a mistake. CONFIRMED: `/llms.txt` advertises `/v2/listings`, `/v2/insights/summary` etc. as real, working endpoints — calling `/v2/insights/summary` directly returns `404` with the API's own message: *"there is no /v2; llms.txt announced it early. The API is /v1."* The API itself confirms this file contains false information. Not using its stats as answers.
 - **evidence**: []
 
 ---

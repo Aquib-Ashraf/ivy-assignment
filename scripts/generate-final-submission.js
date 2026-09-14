@@ -122,12 +122,12 @@ projects.forEach(p => {
 
 // Build submission object
 const submission = {
-  "api_key": "YOUR_API_KEY_HERE",
+  "api_key": "IVY26-4670442292A7",
   "candidate": {
-    "name": "Aquib Ashraf",
-    "email": "you@mnnit.ac.in",
+    "name": "Mohd Aquib Ashraf",
+    "email": "mohd.20233186@mnnit.ac.in",
     "repo_url": "https://github.com/Aquib-Ashraf/ivy-assignment",
-    "demo_url": "https://your-app.vercel.app"
+    "demo_url": "https://ivy-assignment-kappa.vercel.app/"
   },
   "answers": {
     "total_listing_records": listings.length,
